@@ -19,13 +19,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 // App routes
 
-app.MapGet("/", ([FromServices] IHttpClientFactory httpClientFactory) =>
+app.MapGet("/", ([FromServices] IHttpClientFactory httpClientFactory, [FromQuery] string posToken) =>
 {
-    var client = httpClientFactory.CreateClient();
-    client.BaseAddress = new Uri(DivarConstants.AuthorizationRequestUrl);
+    var clientId = builder.Configuration.GetSection("Divar:App:ClientId").ToString()!;
+    var scope = $"POST_ADDON_CREATE.{posToken}";
+    var queries = string.Join('&', new Dictionary<string, string>
+    {
+        { "response_type", "code" },
+        { "client_id", clientId },
+        { "scope", scope },
+        { "state", "111" }
+    });
+    var redirectUrl = DivarConstants.AuthorizationRequestUrl + "?" + queries;
+    return Task.FromResult(Results.Redirect(redirectUrl));
 });
 
 var summaries = new[]
