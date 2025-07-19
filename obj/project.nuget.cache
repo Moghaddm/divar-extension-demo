@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "wZtIIuw+EUQ=",
+  "dgSpecHash": "xSk6oExXPa4=",
   "success": true,
   "projectFilePath": "/home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/DivarExtensionDemo.csproj",
   "expectedPackageFiles": [
     "/home/mohammad-mahdi/.nuget/packages/microsoft.aspnetcore.openapi/9.0.6/microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
-    "/home/mohammad-mahdi/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+    "/home/mohammad-mahdi/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512",
+    "/home/mohammad-mahdi/.nuget/packages/scalar.aspnetcore/2.6.3/scalar.aspnetcore.2.6.3.nupkg.sha512"
   ],
   "logs": []
 }

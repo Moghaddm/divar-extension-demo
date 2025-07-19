@@ -1,5 +1,8 @@
-using DivarExtensionDemo;
+using System.Text.Json;
+using DivarExtensionDemo.Constants;
+using DivarExtensionDemo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,16 +18,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
 
 // App routes
 
-app.MapGet("/", ([FromServices] IHttpClientFactory httpClientFactory, [FromQuery] string posToken) =>
+app.MapGet("/a", ([FromQuery] string postToken) =>
 {
     var clientId = builder.Configuration.GetSection("Divar:App:ClientId").ToString()!;
-    var scope = $"POST_ADDON_CREATE.{posToken}";
+    var scope = $"POST_ADDON_CREATE.{postToken}";
     var queries = string.Join('&', new Dictionary<string, string>
     {
         { "response_type", "code" },
@@ -33,7 +37,36 @@ app.MapGet("/", ([FromServices] IHttpClientFactory httpClientFactory, [FromQuery
         { "state", "111" }
     });
     var redirectUrl = DivarConstants.AuthorizationRequestUrl + "?" + queries;
-    return Task.FromResult(Results.Redirect(redirectUrl));
+    return Results.Redirect(redirectUrl);
+});
+
+app.MapPost("/auth/fallback", async (
+    [FromServices] IHttpClientFactory httpClientFactory,
+    [FromQuery] string state,
+    [FromQuery] string code,
+    CancellationToken cancellationToken
+) =>
+{
+    const string originalState = "111";
+    if (originalState != state) return Results.Unauthorized();
+    var client = httpClientFactory.CreateClient();
+    var request = new HttpRequestMessage(HttpMethod.Post, DivarConstants.AccessTokenRequestUrl);
+    request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+    request.Content = JsonContent.Create(new
+    {
+        grant_type = "authorization_code",
+        Code = code,
+        client_id = builder.Configuration.GetSection("Divar:App:ClientId").ToString()!,
+        client_secret = builder.Configuration.GetSection("Divar:App:ClientSecret").ToString()!,
+        redirect_uri = DivarConstants.AuthorizationRequestUrl
+    });
+    var clientResponse = await client.SendAsync(request, cancellationToken);
+    clientResponse.EnsureSuccessStatusCode();
+    if (!clientResponse.IsSuccessStatusCode) return Results.Unauthorized();
+    var responseAsText = await clientResponse.Content.ReadAsStringAsync(cancellationToken);
+    var response = JsonSerializer.Deserialize<AuthAccessTokenResponse>(responseAsText);
+    var redirectUrl = $"{DivarConstants.BaseAppUrl}?token={response!.Access_Token}";
+    return Results.Redirect(redirectUrl);
 });
 
 var summaries = new[]
