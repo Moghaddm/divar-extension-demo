@@ -1,4 +1,5 @@
 using System.ClientModel;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using DivarExtensionDemo.Constants;
 using DivarExtensionDemo.Models.Comparision;
@@ -67,8 +68,11 @@ app.MapPost("/auth/fallback", async (
     clientResponse.EnsureSuccessStatusCode();
     if (!clientResponse.IsSuccessStatusCode) return Results.Unauthorized();
     var responseAsText = await clientResponse.Content.ReadAsStringAsync(cancellationToken);
-    var response = JsonSerializer.Deserialize<AccessTokenResponse>(responseAsText);
-    var redirectUrl = $"{DivarConstants.BaseAppUrl}?token={response!.Access_Token}";
+    var response = JsonSerializer.Deserialize<AccessTokenResponse>(responseAsText, new JsonSerializerOptions
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    });
+    var redirectUrl = $"{DivarConstants.BaseAppUrl}?token={response!.AccessToken}";
     return Results.Redirect(redirectUrl);
 });
 
