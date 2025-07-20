@@ -484,3 +484,10 @@ $RECYCLE.BIN/
 *.swp
 
 appsettings.Development.json
+
+# Build output directories
+**/bin/
+**/obj/
+
+# Make sure to ignore DLLs in any location
+**/*.dll
