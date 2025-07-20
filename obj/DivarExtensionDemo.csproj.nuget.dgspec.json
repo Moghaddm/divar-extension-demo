@@ -49,6 +49,10 @@
               "target": "Package",
               "version": "[9.0.6, )"
             },
+            "OpenAI": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Scalar.AspNetCore": {
               "target": "Package",
               "version": "[2.6.3, )"

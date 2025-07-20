@@ -1,7 +1,11 @@
+using System.ClientModel;
 using System.Text.Json;
 using DivarExtensionDemo.Constants;
 using DivarExtensionDemo.Models;
+using DivarExtensionDemo.Models.Comparision;
+using DivarExtensionDemo.Models.Divar;
 using Microsoft.AspNetCore.Mvc;
+using OpenAI;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,9 +68,60 @@ app.MapPost("/auth/fallback", async (
     clientResponse.EnsureSuccessStatusCode();
     if (!clientResponse.IsSuccessStatusCode) return Results.Unauthorized();
     var responseAsText = await clientResponse.Content.ReadAsStringAsync(cancellationToken);
-    var response = JsonSerializer.Deserialize<AuthAccessTokenResponse>(responseAsText);
+    var response = JsonSerializer.Deserialize<AccessTokenResponse>(responseAsText);
     var redirectUrl = $"{DivarConstants.BaseAppUrl}?token={response!.Access_Token}";
     return Results.Redirect(redirectUrl);
+});
+
+app.MapGet("/comparasion", async ([FromServices] IHttpClientFactory httpClientFactory, [FromQuery] string postToken,
+    CancellationToken cancellationToken) =>
+{
+    var divarApiKey = builder.Configuration.GetSection("Divar:App:ApiKey").ToString()!;
+    var aiApiKey = builder.Configuration.GetSection("AI:ApiKey").ToString()!;
+    var client = new HttpClient();
+    var request = new HttpRequestMessage(HttpMethod.Get, DivarConstants.RetrievePostInformationUrl + postToken);
+    request.Headers.Add("Accept", "application/json");
+    request.Headers.Add("X-API-Key", divarApiKey);
+    var clientResponse = await client.SendAsync(request, cancellationToken);
+    if (!clientResponse.IsSuccessStatusCode) return Results.BadRequest("Request to retrieve post information failed.");
+    var responseAsJson = await clientResponse.Content.ReadAsStringAsync(cancellationToken);
+    var post = JsonSerializer.Deserialize<PostResponse>(responseAsJson);
+    List<string> items = ["Red Dead Redemption 2", "Adobe Premiere 2024", "After Effects 2024"];
+    var prompt =
+        """
+            I will provide you with information about a technological or digital product post from an Iranian e-commerce platform called Divar. The product can only be a laptop, PC, or mobile phone.
+            After that, I will give you a list of games and software (such as ""Red Dead Redemption 2"", ""Adobe Premiere 2024"", or ""After Effects 2024"").
+            Your task is to:
+            1. Analyze the hardware specifications in the product post.
+            2. Compare the given hardware against the system requirements of each game or software I provide.
+            3. Return a comparison result that shows how well the device can run each item. Represent this as a percentage (0–100%), indicating performance capability. For example: ""Premiere 2024"": 65%
+            Your response must be:
+            - In Persian (Farsi) language.
+            - In the form of a JSON object that can be easily deserialized into the following C# POCO model:
+            public sealed class ComparisionResponse
+            {
+                public string Text { get; init; } = null!;
+                public Dictionary<string, float> Items { get; init; } = null!;
+            }
+            Use `Text` to provide a short summary in Persian, such as whether the system is generally good or weak for games/software.
+            Use `Items` to list each game/software name (in English, exactly as I provide them) and its compatibility percentage.
+            Example expected output (in JSON):
+            {
+              ""Text"": ""این گوشی برای اجرای نرم‌افزارهای سنگین مناسب نیست."",
+              ""Items"": {
+                ""Premiere 2024"": 30.0,
+                ""After Effects 2024"": 20.0,
+                ""Red Dead Redemption 2"": 10.0
+              }
+            }
+            Only reply with the JSON object and nothing else.
+            Now, I will give you the product post and list of items to compare.
+            Post Information:
+        """ + "\n" + post + "\n Items: \n" + string.Join(",", items);
+    var aiClient = new OpenAIClient(new ApiKeyCredential(aiApiKey));
+    var aiResponse = await aiClient.GetChatClient(AiConstants.DefaultCompletionModel).CompleteChatAsync(prompt);
+    var response = JsonSerializer.Deserialize<ComparisionVm>(aiResponse.Value.Content[0].Text);
+    return Results.Ok(response);
 });
 
 var summaries = new[]

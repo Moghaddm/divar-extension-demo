@@ -1,6 +1,6 @@
-namespace DivarExtensionDemo.Models;
+namespace DivarExtensionDemo.Models.Divar;
 
-public sealed class AuthAccessTokenResponse
+public sealed class AccessTokenResponse
 {
     public string Access_Token { get; set; } = null!;
     public int Expires_In { get; set; }
