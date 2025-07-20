@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DivarExtensionDemo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1892cad494b48094014453bb85ba73f7c6354b65")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b3aeb5f62497ee5c4e7e97ebecdfc8c872de5e80")]
 [assembly: System.Reflection.AssemblyProductAttribute("DivarExtensionDemo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DivarExtensionDemo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

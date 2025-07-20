@@ -33,3 +33,6 @@
 /home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/obj/Debug/net9.0/DivarExtensionDemo.pdb
 /home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/obj/Debug/net9.0/DivarExtensionDemo.genruntimeconfig.cache
 /home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/obj/Debug/net9.0/ref/DivarExtensionDemo.dll
+/home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/bin/Debug/net9.0/OpenAI.dll
+/home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/bin/Debug/net9.0/System.ClientModel.dll
+/home/mohammad-mahdi/Desktop/Project/DivarExtensionDemo/bin/Debug/net9.0/System.Memory.Data.dll

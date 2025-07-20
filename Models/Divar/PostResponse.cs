@@ -1,41 +1,59 @@
 namespace DivarExtensionDemo.Models.Divar;
 
-public sealed class PostResponse
+public class PostResponse
 {
-    public string Token { get; init; } = null!;
-    public string Category { get; init; } = null!;
-    public string City { get; init; } = null!;
-    public string District { get; init; } = null!;
-    public bool ChatEnabled { get; init; }
-    public bool SupplierChatAssistantEnabled { get; init; }
+    public string Token { get; set; } = null!;
+    public string Category { get; set; } = null!;
+    public string City { get; set; } = null!;
+    public string District { get; set; } = null!;
+    public PostData Data { get; set; } = null!;
+    public string State { get; set; } = null!;
+    public DateTime FirstPublishedAt { get; set; }
+    public bool ChatEnabled { get; set; }
+    public BusinessData BusinessData { get; set; } = null!;
+    public DateTime LastModifiedAt { get; set; }
+}
 
-    public class Data
-    {
-        public string BrandModel { get; init; } = null!;
-        public string Color { get; init; } = null!;
-        public string Description { get; init; } = null!;
-        public int ExpireDays { get; init; }
-        public List<string> Images { get; init; } = null!;
-        public string InternalStorage { get; init; } = null!;
-        public int NewPrice { get; init; }
-        public string Originality { get; init; } = null!;
-        public string PrefilledTitle { get; init; } = null!;
+public class PostData
+{
+    public bool HasWebcam { get; set; }
+    public string Os { get; set; } = null!;
+    public string ScreenResolution { get; set; } = null!;
+    public Price Price { get; set; } = null!;
+    public string RamMemory { get; set; } = null!;
+    public int WarrantyRemainingMonths { get; set; }
+    public string InternalStorage { get; set; } = null!;
+    public string Description { get; set; } = null!;
+    public string Color { get; set; } = null!;
+    public bool IsNotNegotiable { get; set; }
+    public bool Exchange { get; set; }
+    public string ScreenSize { get; set; } = null!;
+    public string ScreenRefreshRateHz { get; set; } = null!;
+    public bool TouchScreen { get; set; }
+    public List<string> Images { get; set; } = null!;
+    public string Model { get; set; } = null!;
+    public bool HasBox { get; set; }
+    public bool HasBag { get; set; }
+    public bool HasBacklitKeyboard { get; set; }
+    public string Processor { get; set; } = null!;
+    public string Status { get; set; } = null!;
+    public bool OriginalOs { get; set; }
+    public string Title { get; set; } = null!;
+    public bool HasHdmiPort { get; set; }
+    public string Brand { get; set; } = null!;
+    public decimal NewPrice { get; set; }
+    public string StorageType { get; set; } = null!;
+    public bool HasOriginalCharger { get; set; }
+}
 
-        public class Price
-        {
-            public string Mode { get; init; } = null!;
-            public int Value { get; init; }
-        }
+public class Price
+{
+    public string Mode { get; set; } = null!;
+    public decimal Value { get; set; }
+}
 
-        public string RamMemory { get; init; } = null!;
-        public string SimCardSlot { get; init; } = null!;
-        public string Status { get; init; } = null!;
-        public string Title { get; init; } = null!;
-    }
-
-    public class BusinessData
-    {
-        public string BusinessType { get; init; } = null!;
-        public string BusinessName { get; init; } = null!;
-    }
+public class BusinessData
+{
+    public string BusinessType { get; set; } = null!;
+    public string BusinessName { get; set; } = null!;
 }

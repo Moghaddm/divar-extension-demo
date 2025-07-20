@@ -1,7 +1,7 @@
 using System.ClientModel;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using DivarExtensionDemo.Constants;
-using DivarExtensionDemo.Models;
 using DivarExtensionDemo.Models.Comparision;
 using DivarExtensionDemo.Models.Divar;
 using Microsoft.AspNetCore.Mvc;
@@ -76,8 +76,9 @@ app.MapPost("/auth/fallback", async (
 app.MapGet("/comparasion", async ([FromServices] IHttpClientFactory httpClientFactory, [FromQuery] string postToken,
     CancellationToken cancellationToken) =>
 {
-    var divarApiKey = builder.Configuration.GetSection("Divar:App:ApiKey").ToString()!;
-    var aiApiKey = builder.Configuration.GetSection("AI:ApiKey").ToString()!;
+    var divarApiKey = builder.Configuration.GetSection("Divar:Extension:ApiKey").Value!;
+    var aiApiKey = builder.Configuration.GetSection("AI:ApiKey").Value!;
+    var aiEndPoint = builder.Configuration.GetSection("AI:EndPoint").Value!;
     var client = new HttpClient();
     var request = new HttpRequestMessage(HttpMethod.Get, DivarConstants.RetrievePostInformationUrl + postToken);
     request.Headers.Add("Accept", "application/json");
@@ -85,12 +86,12 @@ app.MapGet("/comparasion", async ([FromServices] IHttpClientFactory httpClientFa
     var clientResponse = await client.SendAsync(request, cancellationToken);
     if (!clientResponse.IsSuccessStatusCode) return Results.BadRequest("Request to retrieve post information failed.");
     var responseAsJson = await clientResponse.Content.ReadAsStringAsync(cancellationToken);
-    var post = JsonSerializer.Deserialize<PostResponse>(responseAsJson);
+    var post = JsonSerializer.Deserialize<PostResponse>(responseAsJson,
+        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower })!;
     List<string> items = ["Red Dead Redemption 2", "Adobe Premiere 2024", "After Effects 2024"];
     var prompt =
         """
             I will provide you with information about a technological or digital product post from an Iranian e-commerce platform called Divar. The product can only be a laptop, PC, or mobile phone.
-            After that, I will give you a list of games and software (such as ""Red Dead Redemption 2"", ""Adobe Premiere 2024"", or ""After Effects 2024"").
             Your task is to:
             1. Analyze the hardware specifications in the product post.
             2. Compare the given hardware against the system requirements of each game or software I provide.
@@ -114,11 +115,15 @@ app.MapGet("/comparasion", async ([FromServices] IHttpClientFactory httpClientFa
                 ""Red Dead Redemption 2"": 10.0
               }
             }
-            Only reply with the JSON object and nothing else.
+            Only reply with the JSON object and nothing else. Just the json without ``` like things or code additional styling.
             Now, I will give you the product post and list of items to compare.
             Post Information:
-        """ + "\n" + post + "\n Items: \n" + string.Join(",", items);
-    var aiClient = new OpenAIClient(new ApiKeyCredential(aiApiKey));
+        """ + "\n" +
+        JsonSerializer.Serialize(post,
+            new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n Items: \n" +
+        string.Join(",", items);
+    var aiClient = new OpenAIClient(new ApiKeyCredential(aiApiKey),
+        new OpenAIClientOptions { Endpoint = new Uri(aiEndPoint) });
     var aiResponse = await aiClient.GetChatClient(AiConstants.DefaultCompletionModel).CompleteChatAsync(prompt);
     var response = JsonSerializer.Deserialize<ComparisionVm>(aiResponse.Value.Content[0].Text);
     return Results.Ok(response);
