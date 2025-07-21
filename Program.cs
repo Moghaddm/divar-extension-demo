@@ -29,40 +29,40 @@ app.UseHttpsRedirection();
 
 // App routes
 
-app.MapGet("/a", ([FromQuery] string postToken) =>
+app.MapGet("/goto-divar", ([FromQuery] string postToken) =>
 {
-    var clientId = builder.Configuration.GetSection("Divar:App:ClientId").ToString()!;
-    var scope = $"POST_ADDON_CREATE.{postToken}";
+    var clientId = builder.Configuration.GetSection("Divar:Extension:ClientId").Value!;
+    var scope = $"USER_PHONE";
     var queries = string.Join('&', new Dictionary<string, string>
     {
         { "response_type", "code" },
+        { "redirect_uri", "http://localhost:5053/auth/fallback" },
         { "client_id", clientId },
         { "scope", scope },
-        { "state", "111" }
-    });
+        { "state", "@Mohammad2005" }
+    }.Select(q => $"{q.Key}={q.Value}"));
     var redirectUrl = DivarConstants.AuthorizationRequestUrl + "?" + queries;
     return Results.Redirect(redirectUrl);
 });
 
-app.MapPost("/auth/fallback", async (
+app.MapGet("/auth/fallback", async (
     [FromServices] IHttpClientFactory httpClientFactory,
     [FromQuery] string state,
     [FromQuery] string code,
     CancellationToken cancellationToken
 ) =>
 {
-    const string originalState = "111";
+    const string originalState = "@Mohammad2005";
     if (originalState != state) return Results.Unauthorized();
     var client = httpClientFactory.CreateClient();
     var request = new HttpRequestMessage(HttpMethod.Post, DivarConstants.AccessTokenRequestUrl);
-    request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-    request.Content = JsonContent.Create(new
+    request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
     {
-        grant_type = "authorization_code",
-        Code = code,
-        client_id = builder.Configuration.GetSection("Divar:App:ClientId").ToString()!,
-        client_secret = builder.Configuration.GetSection("Divar:App:ClientSecret").ToString()!,
-        redirect_uri = DivarConstants.AuthorizationRequestUrl
+        { "grant_type", "authorization_code" },
+        { "code", code },
+        { "client_id", builder.Configuration.GetSection("Divar:Extension:ClientId").Value! },
+        { "client_secret", builder.Configuration.GetSection("Divar:Extension:ClientSecret").Value! },
+        { "redirect_uri", "http://localhost:5053/auth/fallback" }
     });
     var clientResponse = await client.SendAsync(request, cancellationToken);
     clientResponse.EnsureSuccessStatusCode();
@@ -70,7 +70,9 @@ app.MapPost("/auth/fallback", async (
     var responseAsText = await clientResponse.Content.ReadAsStringAsync(cancellationToken);
     var response = JsonSerializer.Deserialize<AccessTokenResponse>(responseAsText, new JsonSerializerOptions
     {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        PropertyNameCaseInsensitive = true
     });
     var redirectUrl = $"{DivarConstants.BaseAppUrl}?token={response!.AccessToken}";
     return Results.Redirect(redirectUrl);
