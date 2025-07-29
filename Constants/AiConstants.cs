@@ -15,10 +15,10 @@ public static class AiConstants
         {
         public string PositiveConclusion { get; init; } = null!;
         public string NegativeConclusion { get; init; } = null!;
-        public List<SoftwareItem> Items { get; init; } = null!;
+        public List<SoftwareItem> Softwares { get; init; } = null!;
         public string Advice { get; init; } = null!;
         }
-        public sealed class SoftwareItem
+        public sealed class ComparisionSoftwareVm
         {
         public string Name { get; init; } = null!;
         public float Percentage { get; init; }
@@ -26,7 +26,7 @@ public static class AiConstants
         }
         PositiveConclusion: Describe the benefits and strengths of the product for running the provided games/software, using a friendly and conversational tone, as if talking to a friend.
         NegativeConclusion: Describe potential risks, limitations, or issues of the product for running the provided games/software, keeping the tone informal and approachable.
-        Items: A list of objects, each containing:Name: The game/software name (in English, exactly as I provide).
+        Softwares: A list of objects, each containing:Name: The game/software name (in English, exactly as I provide).
         Percentage: Compatibility percentage (0–100%).
         Status: A status in Persian, chosen from: "تقریباً اوکیه", "خوبه", "کاملاً آماده‌ست", "سازگار نیست".
         Advice: Provide suggestions for improving performance or compatibility (e.g., hardware upgrades or configuration changes), using the same friendly and informal tone.
@@ -34,7 +34,7 @@ public static class AiConstants
         {
         "PositiveConclusion": "این لپ‌تاپ برای ویرایش ویدئو و بازی‌های سبک حسابی به‌درد می‌خوره!",
         "NegativeConclusion": "ولی برای بازی‌های سنگین ممکنه یه کم لگ بندازه و اذیتت کنه.",
-        "Items": [
+        "Softwares": [
         {
         "Name": "Premiere 2024",
         "Percentage": 70.0,

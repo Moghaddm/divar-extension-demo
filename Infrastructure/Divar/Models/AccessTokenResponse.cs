@@ -1,4 +1,4 @@
-namespace DivarExtensionDemo.Models.Divar;
+namespace DivarExtensionDemo.Infrastructure.Divar.Models;
 
 public sealed class AccessTokenResponse
 {

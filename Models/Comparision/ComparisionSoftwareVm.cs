@@ -1,6 +1,7 @@
 namespace DivarExtensionDemo.Models.Comparision;
 
-public sealed class SoftwareItem
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class ComparisionSoftwareVm
 {
     public string Name { get; init; } = null!;
     public float Percentage { get; init; }
