@@ -2,7 +2,7 @@ using DivarExtensionDemo.Entities;
 using DivarExtensionDemo.Services.Interfaces;
 using MongoDB.Driver;
 
-namespace DivarExtensionDemo.Services.Implementations;
+namespace DivarExtensionDemo.Services;
 
 public sealed class SoftwareService(IMongoDatabase mongoDatabase) : ISoftwareService
 {

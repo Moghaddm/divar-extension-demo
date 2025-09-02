@@ -2,7 +2,7 @@ using System.Security.Claims;
 using DivarExtensionDemo.Extensions;
 using DivarExtensionDemo.Infrastructure.JWT;
 using DivarExtensionDemo.Infrastructure.MongoDb;
-using DivarExtensionDemo.Services.Implementations;
+using DivarExtensionDemo.Services;
 using DivarExtensionDemo.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

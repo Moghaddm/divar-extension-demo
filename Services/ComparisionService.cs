@@ -9,7 +9,7 @@ using MongoDB.Driver.Linq;
 using OpenAI;
 using OpenAI.Chat;
 
-namespace DivarExtensionDemo.Services.Implementations;
+namespace DivarExtensionDemo.Services;
 
 public sealed class ComparisionService(
     IConfiguration configuration,

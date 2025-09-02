@@ -4,7 +4,7 @@ using DivarExtensionDemo.Infrastructure.Divar.Models;
 using DivarExtensionDemo.Services.Interfaces;
 using StackExchange.Redis;
 
-namespace DivarExtensionDemo.Services.Implementations;
+namespace DivarExtensionDemo.Services;
 
 public sealed class DivarService : IDivarService
 {
