@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using DivarExtensionDemo.Entities;
+using DivarExtensionDemo.Enums;
 using DivarExtensionDemo.Infrastructure.Divar.Models;
 using DivarExtensionDemo.Models.Comparision;
 using DivarExtensionDemo.Services.Interfaces;
@@ -37,6 +38,8 @@ public sealed class ComparisionService(
             .Where(s => softwareIds.Contains(s.Id))
             .Select(s => new { s.Id, s.Name })
             .ToListAsync(cancellationToken);
+
+        if (softwareIds.Length is 0) throw new ArgumentException("Send expected software surely.");
 
         var softwares = string.Join('\n',
             softwareEntities.Select(s => $"Item Identifier(ID): {s.Id}, Name: {s.Name}").ToList());
@@ -78,6 +81,44 @@ public sealed class ComparisionService(
              {postData}
              """;
 
+        var obje = new ComparisionResponse("Good", "Bad",
+        [
+            new ComparisionSoftwareResponse("Id returned as software identifier.", 70, 0)
+        ], "Mustbebetter");
+        var serialized = JsonSerializer.Serialize(obje);
+        /*var responseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+            jsonSchemaFormatName: typeof(ComparisionResponse).ToString(),
+            jsonSchema: BinaryData.FromString(serialized)
+        );*/
+
+        var responseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+            jsonSchemaFormatName: "ComparisionResponse", // ✅ simple name, no namespace, no dots
+            jsonSchema: BinaryData.FromString(@"
+    {
+      ""type"": ""object"",
+      ""properties"": {
+        ""PositiveConclusion"": { ""type"": ""string"" },
+        ""NegativeConclusion"": { ""type"": ""string"" },
+        ""Softwares"": {
+          ""type"": ""array"",
+          ""items"": {
+            ""type"": ""object"",
+            ""properties"": {
+              ""Id"": { ""type"": ""string"" },
+              ""Percentage"": { ""type"": ""integer"" },
+              ""Status"": { ""type"": ""integer"" }
+            },
+            ""required"": [""Id"", ""Percentage"", ""Status""]
+          }
+        },
+        ""Advice"": { ""type"": ""string"" }
+      },
+      ""required"": [""PositiveConclusion"", ""NegativeConclusion"", ""Softwares"", ""Advice""]
+    }
+    ")
+        );
+
+
         var aiResponse = await openAiClient
             .GetChatClient("gpt-4o-mini")
             .CompleteChatAsync(
@@ -85,10 +126,7 @@ public sealed class ComparisionService(
                 options: new ChatCompletionOptions
                 {
                     Temperature = 0f,
-                    ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-                        jsonSchemaFormatName: "ComparisionResponse",
-                        jsonSchema: BinaryData.FromObjectAsJson(typeof(ComparisionResponse))
-                    )
+                    ResponseFormat = responseFormat
                 },
                 cancellationToken: cancellationToken
             );
